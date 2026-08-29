@@ -9,8 +9,74 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            // Permission status
-            Section("Accessibility Permission") {
+            // ── Menu Bar ──────────────────────────────────────────────
+            Section {
+                // Status row
+                HStack(spacing: WFSpacing.md) {
+                    ZStack {
+                        Circle()
+                            .fill(Color(hex: "#34C759").opacity(0.15))
+                            .frame(width: 36, height: 36)
+                        Image(systemName: "rectangle.3.group.fill")
+                            .font(.system(size: 16))
+                            .foregroundStyle(Color(hex: "#34C759"))
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Menu bar icon is active")
+                            .font(.system(size: 13, weight: .semibold))
+                        Text("Look for \(Image(systemName: "rectangle.3.group.fill")) in the top-right of your screen")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    // Pulse dot
+                    Circle()
+                        .fill(Color(hex: "#34C759"))
+                        .frame(width: 8, height: 8)
+                }
+                .padding(.vertical, 4)
+
+                // Hide from Dock toggle
+                Toggle(isOn: $showInDock) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Show Dock icon")
+                        Text("When off, Workspace Flow runs menu-bar only (no Dock icon)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .onChange(of: showInDock) { _, show in
+                    NSApp.setActivationPolicy(show ? .regular : .accessory)
+                }
+                .onAppear {
+                    // Sync toggle to actual policy
+                    showInDock = NSApp.activationPolicy() == .regular
+                }
+            } header: {
+                Label("Menu Bar", systemImage: "menubar.rectangle")
+            }
+
+            // ── Workspace Switcher ────────────────────────────────────
+            Section {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Open Switcher Overlay")
+                        Text("Press this shortcut anywhere to show the workspace switcher")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    TextField("e.g. ⌥Space", text: $switcherShortcut)
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 110)
+                        .multilineTextAlignment(.center)
+                }
+            } header: {
+                Label("Workspace Switcher", systemImage: "square.grid.2x2")
+            }
+
+            // ── Accessibility Permission ──────────────────────────────
+            Section {
                 HStack {
                     Label(
                         appState.permissionService.isGranted
@@ -38,23 +104,19 @@ struct SettingsView: View {
                 Text("Workspace Flow uses Accessibility access only to identify, move, resize, minimize, and bring forward app windows. It never reads window contents.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+            } header: {
+                Label("Accessibility Permission", systemImage: "hand.raised.fill")
             }
 
-            Section("Workspace Switcher") {
-                HStack {
-                    Text("Open Switcher Overlay")
-                    Spacer()
-                    TextField("e.g. ⌥Space", text: $switcherShortcut)
-                        .textFieldStyle(.roundedBorder)
-                        .frame(width: 120)
-                }
-            }
-
-            Section("General") {
+            // ── General ───────────────────────────────────────────────
+            Section {
                 Toggle("Launch at Login", isOn: $launchAtLogin)
+            } header: {
+                Label("General", systemImage: "gearshape")
             }
 
-            Section("About") {
+            // ── About ─────────────────────────────────────────────────
+            Section {
                 HStack {
                     Text("Version")
                     Spacer()
@@ -68,15 +130,19 @@ struct SettingsView: View {
                         .foregroundStyle(.secondary)
                         .font(.system(.caption, design: .monospaced))
                 }
-
                 Button("Privacy Policy") { showPrivacyPolicy.toggle() }
                     .buttonStyle(.link)
+            } header: {
+                Label("About", systemImage: "info.circle")
             }
 
-            Section("Data") {
-                Text("All workspace data is stored locally on your Mac. No account, no cloud, no analytics.")
+            // ── Data ──────────────────────────────────────────────────
+            Section {
+                Label("All workspace data is stored locally on your Mac. No account, no cloud, no analytics.", systemImage: "lock.fill")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+            } header: {
+                Label("Privacy & Data", systemImage: "lock.shield")
             }
         }
         .formStyle(.grouped)
@@ -86,6 +152,7 @@ struct SettingsView: View {
                 .frame(minWidth: 460, minHeight: 400)
         }
     }
+
 }
 
 // MARK: - Privacy Policy

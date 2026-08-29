@@ -23,7 +23,7 @@
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
 	<key>LSUIElement</key>
-	<true/>
+	<false/>
 	<key>NSAccessibilityUsageDescription</key>
 	<string>Workspace Flow uses Accessibility access only to identify, move, resize, minimize, and bring forward app windows when you restore a workspace. It does not read window contents, record your screen, or collect your data.</string>
 	<key>NSHumanReadableCopyright</key>

@@ -11,6 +11,9 @@ struct WorkspaceDashboardView: View {
     @State private var workspaceToDelete: Workspace? = nil
     @State private var isCapturing        = false
     @State private var searchText         = ""
+    @AppStorage("menuBarBannerDismissed") private var bannerDismissed = false
+    @State private var showMenuBarPopover = false
+
 
     var filtered: [Workspace] {
         searchText.isEmpty ? workspaces
@@ -95,7 +98,14 @@ struct WorkspaceDashboardView: View {
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: WFSpacing.xl) {
-                        // Search + toolbar
+                        // ── Menu Bar callout banner ──────────────────
+                        if !bannerDismissed {
+                            MenuBarCalloutBanner {
+                                bannerDismissed = true
+                            }
+                        }
+
+                        // Search bar
                         HStack {
                             Image(systemName: "magnifyingglass")
                                 .foregroundStyle(.secondary)
@@ -162,10 +172,25 @@ struct WorkspaceDashboardView: View {
                       ? "Accessibility permission granted"
                       : "Click to open Accessibility settings")
             }
+
+            ToolbarItem {
+                Button {
+                    showMenuBarPopover.toggle()
+                } label: {
+                    Image(systemName: "menubar.rectangle")
+                        .foregroundStyle(.secondary)
+                }
+                .help("Workspace Flow lives in your menu bar")
+                .popover(isPresented: $showMenuBarPopover, arrowEdge: .top) {
+                    MenuBarInfoPopover()
+                }
+            }
         }
     }
 
+
     private var emptyState: some View {
+
         WFEmptyState(
             icon: "rectangle.3.group",
             title: "Your Mac, organized around how you work.",
