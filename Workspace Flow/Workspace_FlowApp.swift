@@ -5,13 +5,6 @@
 //  Created by Macaroni on 29/08/26.
 //
 
-import SwiftUI
+// This file is intentionally empty.
+// The app entry point is in App/WorkspaceFlowApp.swift
 
-@main
-struct Workspace_FlowApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
-    }
-}

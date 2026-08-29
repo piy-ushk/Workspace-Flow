@@ -1,24 +1,8 @@
-//
-//  ContentView.swift
-//  Workspace Flow
-//
-//  Created by Macaroni on 29/08/26.
-//
-
 import SwiftUI
 
-struct ContentView: View {
-    var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
-    }
-}
-
-#Preview {
-    ContentView()
+// ContentView is superseded by WorkspaceDashboardView.
+// This file exists only to satisfy the PBXFileSystemSynchronizedRootGroup scanner.
+// Nothing imports or uses this struct.
+private struct _UnusedContentView: View {
+    var body: some View { EmptyView() }
 }
