@@ -5,7 +5,7 @@ import AppKit
 final class DockNavigatorPanel: NSPanel {
     init() {
         super.init(
-            contentRect: NSRect(x: 0, y: 0, width: 450, height: 600),
+            contentRect: NSRect(x: 0, y: 0, width: 450, height: 600), // Height is dynamic, we'll set it
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
@@ -37,20 +37,25 @@ struct DockNavigatorOverlay: View {
     var onOpenDeskFlow: () -> Void
     var onChangeWorkspace: () -> Void
     
+    // Grid configuration
+    let columns = [
+        GridItem(.adaptive(minimum: 80, maximum: 100), spacing: 20)
+    ]
+    
     var body: some View {
         ZStack {
+            // macOS Dock Stack style background
             VisualEffectBlur(material: .hudWindow, blendingMode: .behindWindow)
-                .ignoresSafeArea()
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 4)
+                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                .shadow(color: .black.opacity(0.3), radius: 15, x: 0, y: 5)
             
             VStack(spacing: 0) {
                 // Header (Workspace Info)
                 headerView
                 
-                Divider()
+                Divider().background(Color.white.opacity(0.1))
                 
-                // App List
+                // Content
                 if viewModel.activeWorkspace == nil {
                     VStack {
                         Spacer()
@@ -63,8 +68,10 @@ struct DockNavigatorOverlay: View {
                         .padding(.top, WFSpacing.sm)
                         Spacer()
                     }
+                    .frame(height: 200)
                 } else if showingPicker {
                     workspacePickerView
+                        .frame(height: 300)
                 } else if viewModel.appStates.isEmpty {
                     VStack {
                         Spacer()
@@ -73,22 +80,25 @@ struct DockNavigatorOverlay: View {
                             .foregroundStyle(.secondary)
                         Spacer()
                     }
+                    .frame(height: 200)
                 } else {
-                    appList
+                    appGrid
                 }
                 
-                Divider()
+                Divider().background(Color.white.opacity(0.1))
                 
                 // Footer
                 footerView
             }
         }
-        .frame(width: 450, height: 500)
+        .frame(width: 420)
+        // Spring animation from bottom
         .opacity(appeared ? 1 : 0)
-        .scaleEffect(appeared ? 1 : 0.95)
+        .scaleEffect(appeared ? 1 : 0.4, anchor: .bottom)
+        .offset(y: appeared ? 0 : 50)
         .onAppear {
             viewModel.refresh(with: initialWorkspace)
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.7, blendDuration: 0)) {
                 appeared = true
             }
         }
@@ -98,6 +108,8 @@ struct DockNavigatorOverlay: View {
         .onKeyPress(.escape) { handleKeyDown(53); return .handled }
         .onKeyPress(.downArrow) { handleKeyDown(125); return .handled }
         .onKeyPress(.upArrow) { handleKeyDown(126); return .handled }
+        .onKeyPress(.leftArrow) { handleKeyDown(123); return .handled }
+        .onKeyPress(.rightArrow) { handleKeyDown(124); return .handled }
         .onKeyPress(.return) { handleKeyDown(36); return .handled }
     }
     
@@ -106,8 +118,9 @@ struct DockNavigatorOverlay: View {
             if let workspace = viewModel.activeWorkspace {
                 Image(systemName: workspace.iconName)
                     .foregroundStyle(Color(hex: workspace.colorHex))
+                    .font(.system(size: 18, weight: .semibold))
                 Text(workspace.name)
-                    .font(.headline)
+                    .font(.system(size: 16, weight: .semibold))
             } else {
                 Text("Dock Navigator")
                     .font(.headline)
@@ -124,7 +137,6 @@ struct DockNavigatorOverlay: View {
             .foregroundStyle(Color.accentColor)
         }
         .padding(WFSpacing.md)
-        .background(Color.black.opacity(0.1))
     }
     
     private var workspacePickerView: some View {
@@ -138,43 +150,27 @@ struct DockNavigatorOverlay: View {
         )
     }
     
-    private var appList: some View {
-        VStack(spacing: 0) {
-            // Search
-            HStack {
-                Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                TextField("Search apps...", text: $viewModel.searchText)
-                    .textFieldStyle(.plain)
-            }
-            .padding(WFSpacing.md)
-            
-            Divider()
-            
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(Array(viewModel.filteredApps.enumerated()), id: \.1.id) { index, status in
-                            AppRow(
-                                status: status,
-                                isSelected: index == viewModel.selectedIndex
-                            )
-                            .id(index)
-                            .onTapGesture {
-                                viewModel.selectedIndex = index
-                                if viewModel.activate(status: status) {
-                                    onDismiss()
-                                }
-                            }
+    private var appGrid: some View {
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: 24) {
+                ForEach(Array(viewModel.appStates.enumerated()), id: \.1.id) { index, status in
+                    AppGridCell(
+                        status: status,
+                        isSelected: index == viewModel.selectedIndex
+                    )
+                    .id(index)
+                    .onTapGesture {
+                        viewModel.selectedIndex = index
+                        if viewModel.activate(status: status) {
+                            onDismiss()
                         }
                     }
                 }
-                .onChange(of: viewModel.selectedIndex) { _, newValue in
-                    withAnimation {
-                        proxy.scrollTo(newValue, anchor: .center)
-                    }
-                }
             }
+            .padding(.vertical, 24)
+            .padding(.horizontal, 16)
         }
+        .frame(maxHeight: 400) // constrain height so it doesn't grow unbounded
     }
     
     private var footerView: some View {
@@ -201,13 +197,13 @@ struct DockNavigatorOverlay: View {
             .buttonStyle(.plain)
         }
         .padding(WFSpacing.md)
-        .font(.caption)
+        .font(.system(size: 12))
         .foregroundStyle(.secondary)
     }
     
     @discardableResult
     private func handleKeyDown(_ keyCode: UInt16) -> Bool {
-        let apps = viewModel.filteredApps
+        let apps = viewModel.appStates
         guard !apps.isEmpty else {
             if keyCode == 53 { // Escape
                 onDismiss()
@@ -216,15 +212,34 @@ struct DockNavigatorOverlay: View {
             return false
         }
         
+        // Approximate columns based on width
+        let cols = 3
+        
         switch keyCode {
         case 125: // Down arrow
-            if viewModel.selectedIndex < apps.count - 1 {
-                viewModel.selectedIndex += 1
+            if viewModel.selectedIndex + cols < apps.count {
+                viewModel.selectedIndex += cols
+                return true
+            } else {
+                viewModel.selectedIndex = apps.count - 1
                 return true
             }
         case 126: // Up arrow
+            if viewModel.selectedIndex - cols >= 0 {
+                viewModel.selectedIndex -= cols
+                return true
+            } else {
+                viewModel.selectedIndex = 0
+                return true
+            }
+        case 123: // Left
             if viewModel.selectedIndex > 0 {
                 viewModel.selectedIndex -= 1
+                return true
+            }
+        case 124: // Right
+            if viewModel.selectedIndex < apps.count - 1 {
+                viewModel.selectedIndex += 1
                 return true
             }
         case 36: // Return
@@ -241,55 +256,46 @@ struct DockNavigatorOverlay: View {
         }
         return false
     }
-    
-    func refresh(with workspace: Workspace?) {
-        viewModel.refresh(with: workspace)
-    }
 }
 
-private struct AppRow: View {
+private struct AppGridCell: View {
     let status: DockNavigatorViewModel.AppStatus
     let isSelected: Bool
     
     var body: some View {
-        HStack(spacing: WFSpacing.md) {
-            let nsImage = NSWorkspace.shared.icon(forFile: NSWorkspace.shared.urlForApplication(withBundleIdentifier: status.workspaceApp.bundleIdentifier)?.path ?? "")
-            Image(nsImage: nsImage)
-                .resizable()
-                .frame(width: 32, height: 32)
-                .opacity(status.isRunning ? 1.0 : 0.6)
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(status.workspaceApp.displayName)
-                    .font(.body)
-                    .opacity(status.isRunning ? 1.0 : 0.6)
-                
-                if let title = status.windowTitle {
-                    Text(title)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+        VStack(spacing: 8) {
+            ZStack {
+                // Selection highlight
+                if isSelected {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color.white.opacity(0.15))
+                        .frame(width: 64, height: 64)
                 }
+                
+                let nsImage = NSWorkspace.shared.icon(forFile: NSWorkspace.shared.urlForApplication(withBundleIdentifier: status.workspaceApp.bundleIdentifier)?.path ?? "")
+                Image(nsImage: nsImage)
+                    .resizable()
+                    .frame(width: 48, height: 48)
+                    .opacity(status.isRunning ? 1.0 : 0.6)
+                    // Slight bounce on select
+                    .scaleEffect(isSelected ? 1.05 : 1.0)
+                    .animation(.spring(response: 0.2), value: isSelected)
             }
+            .frame(width: 64, height: 64)
             
-            Spacer()
-            
-            if status.isRunning {
-                Text("Running")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            } else {
-                Text("Launch")
-                    .font(.caption)
-                    .foregroundStyle(Color.accentColor)
+            VStack(spacing: 2) {
+                Text(status.workspaceApp.displayName)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(isSelected ? Color.primary : Color.primary.opacity(0.8))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                
+                // Running indicator
+                Circle()
+                    .fill(status.isRunning ? Color.white.opacity(0.8) : Color.clear)
+                    .frame(width: 4, height: 4)
             }
         }
-        .padding(WFSpacing.md)
-        .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(isSelected ? Color.accentColor.opacity(0.15) : Color.clear)
-        )
         .contentShape(Rectangle())
-        .padding(.horizontal, WFSpacing.sm)
     }
 }

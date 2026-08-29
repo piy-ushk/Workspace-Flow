@@ -30,10 +30,11 @@ final class DockNavigatorManager {
     }
     
     @objc private func handleShowNavigator() {
-        showNavigator()
+        let mouseLocation = NSEvent.mouseLocation
+        showNavigator(at: mouseLocation)
     }
     
-    func showNavigator() {
+    func showNavigator(at point: NSPoint? = nil) {
         guard let appState = appState, let modelContext = modelContext else { return }
         
         if panel == nil {
@@ -78,7 +79,18 @@ final class DockNavigatorManager {
         // Ensure the hosting view gets the workspace from DB before presenting
         
         panel.contentView = hostingView
-        panel.center()
+        
+        // Position panel at mouse location (which is roughly where the Dock icon is)
+        if let pt = point ?? NSEvent.mouseLocation as NSPoint? {
+            let panelSize = panel.frame.size
+            let x = max(0, min(pt.x - (panelSize.width / 2), (NSScreen.main?.frame.width ?? 0) - panelSize.width))
+            // Position above the dock (giving a little padding)
+            let y = pt.y + 20 
+            panel.setFrameOrigin(NSPoint(x: x, y: y))
+        } else {
+            panel.center()
+        }
+        
         panel.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         
@@ -94,14 +106,6 @@ final class DockNavigatorManager {
     }
     
     private func openMainWindow() {
-        NSApp.activate(ignoringOtherApps: true)
-        if let window = NSApp.windows.first(where: { $0.identifier?.rawValue == "main" }) {
-            window.makeKeyAndOrderFront(nil)
-        } else {
-            for window in NSApp.windows where window.identifier?.rawValue == "main" {
-                window.makeKeyAndOrderFront(nil)
-                break
-            }
-        }
+        DashboardWindowController.shared.showWindow()
     }
 }

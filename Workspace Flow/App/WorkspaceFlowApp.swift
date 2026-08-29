@@ -28,36 +28,11 @@ struct DeskFlowApp: App {
     init() {
         let state = AppState()
         _appState = State(initialValue: state)
+        DashboardWindowController.shared.setup(appState: state, modelContainer: Self.modelContainer)
         DockNavigatorManager.shared.setup(appState: state, modelContainer: Self.modelContainer)
     }
 
     var body: some Scene {
-        // MARK: Main Window
-        WindowGroup("DeskFlow", id: "main") {
-            Group {
-                if appState.showOnboarding {
-                    OnboardingView()
-                        .frame(minWidth: 560, minHeight: 480)
-                } else {
-                    WorkspaceDashboardView()
-                        .frame(minWidth: 800, minHeight: 560)
-                }
-            }
-            .environment(appState)
-            .modelContainer(Self.modelContainer)
-        }
-        .windowStyle(.titleBar)
-        .windowToolbarStyle(.unified)
-        .defaultSize(width: 960, height: 640)
-        .commands {
-            CommandGroup(replacing: .newItem) {
-                Button("Save Current Workspace…") {
-                    appState.presentEditor(for: nil)
-                }
-                .keyboardShortcut("s", modifiers: [.command, .shift])
-            }
-        }
-
         // MARK: Settings Window
         Settings {
             SettingsView()
@@ -161,16 +136,7 @@ struct MenuBarContentView: View {
     }
 
     private func openMainWindow() {
-        NSApp.activate(ignoringOtherApps: true)
-        if let window = NSApp.windows.first(where: { $0.identifier?.rawValue == "main" }) {
-            window.makeKeyAndOrderFront(nil)
-        } else {
-            // Open the window group
-            for window in NSApp.windows {
-                window.makeKeyAndOrderFront(nil)
-                break
-            }
-        }
+        DashboardWindowController.shared.showWindow()
     }
 
     private func openSettings() {
