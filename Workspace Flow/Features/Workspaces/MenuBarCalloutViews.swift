@@ -20,7 +20,7 @@ struct MenuBarCalloutBanner: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
-                    Text("Workspace Flow lives in your menu bar")
+                    Text("DeskFlow lives in your menu bar")
                         .font(.system(size: 13, weight: .semibold))
                     // Live pulse
                     Circle()

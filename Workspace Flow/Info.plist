@@ -11,7 +11,9 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>$(PRODUCT_NAME)</string>
+	<string>DeskFlow</string>
+	<key>CFBundleDisplayName</key>
+	<string>DeskFlow</string>
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
@@ -25,7 +27,7 @@
 	<key>LSUIElement</key>
 	<false/>
 	<key>NSAccessibilityUsageDescription</key>
-	<string>Workspace Flow uses Accessibility access only to identify, move, resize, minimize, and bring forward app windows when you restore a workspace. It does not read window contents, record your screen, or collect your data.</string>
+	<string>DeskFlow uses Accessibility access only to identify, move, resize, minimize, and bring forward app windows when you restore a workspace. It does not read window contents, record your screen, or collect your data.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string></string>
 	<key>NSPrincipalClass</key>

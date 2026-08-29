@@ -91,7 +91,7 @@ private struct WelcomeStep: View {
             }
 
             VStack(spacing: WFSpacing.sm) {
-                Text("Workspace Flow")
+                Text("DeskFlow")
                     .font(.system(size: 32, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                 Text("Your workspace, exactly where you left it.")
@@ -149,8 +149,8 @@ private struct PermissionStep: View {
                     .font(.system(size: 26, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                 Text(permissionService.isGranted
-                     ? "Permission granted — Workspace Flow can manage your windows."
-                     : "Workspace Flow needs Accessibility access to move and resize windows when you restore a workspace.")
+                     ? "Permission granted — DeskFlow can manage your windows."
+                     : "DeskFlow needs Accessibility access to move and resize windows when you restore a workspace.")
                     .font(.body)
                     .foregroundStyle(.white.opacity(0.7))
                     .multilineTextAlignment(.center)
@@ -160,7 +160,7 @@ private struct PermissionStep: View {
             HStack(spacing: WFSpacing.sm) {
                 Image(systemName: "lock.shield.fill")
                     .foregroundStyle(Color(hex: "#34C759"))
-                Text("Workspace Flow **never** reads window contents, records your screen, or collects your data.")
+                Text("DeskFlow **never** reads window contents, records your screen, or collects your data.")
                     .font(.caption)
                     .foregroundStyle(.white.opacity(0.6))
             }

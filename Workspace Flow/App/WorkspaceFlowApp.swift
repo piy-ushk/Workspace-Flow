@@ -2,8 +2,11 @@ import SwiftUI
 import SwiftData
 
 @main
-struct WorkspaceFlowApp: App {
-    @State private var appState = AppState()
+struct DeskFlowApp: App {
+    @State private var appState: AppState
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
+
 
     // SwiftData container for all persistent models
     static let modelContainer: ModelContainer = {
@@ -14,7 +17,7 @@ struct WorkspaceFlowApp: App {
             DisplaySnapshot.self,
             ActivityEvent.self
         ])
-        let config = ModelConfiguration("WorkspaceFlow", schema: schema, isStoredInMemoryOnly: false)
+        let config = ModelConfiguration("DeskFlow", schema: schema, isStoredInMemoryOnly: false)
         do {
             return try ModelContainer(for: schema, configurations: config)
         } catch {
@@ -22,9 +25,15 @@ struct WorkspaceFlowApp: App {
         }
     }()
 
+    init() {
+        let state = AppState()
+        _appState = State(initialValue: state)
+        DockNavigatorManager.shared.setup(appState: state, modelContainer: Self.modelContainer)
+    }
+
     var body: some Scene {
         // MARK: Main Window
-        WindowGroup("Workspace Flow", id: "main") {
+        WindowGroup("DeskFlow", id: "main") {
             Group {
                 if appState.showOnboarding {
                     OnboardingView()
@@ -108,12 +117,12 @@ struct MenuBarContentView: View {
 
         Divider()
 
-        Button("Open Workspace Flow") { openMainWindow() }
+        Button("Open DeskFlow") { openMainWindow() }
         Button("Settings…") { openSettings() }
 
         Divider()
 
-        Button("Quit Workspace Flow") { NSApp.terminate(nil) }
+        Button("Quit DeskFlow") { NSApp.terminate(nil) }
     }
 
     @ViewBuilder
@@ -147,6 +156,7 @@ struct MenuBarContentView: View {
             workspace.lastUsedAt = Date()
             try? modelContext.save()
             appState.activityLog.logRestore(result: result, workspace: workspace, in: modelContext)
+            appState.setActiveWorkspace(workspace)
         }
     }
 

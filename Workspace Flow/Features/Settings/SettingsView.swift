@@ -40,7 +40,7 @@ struct SettingsView: View {
                 Toggle(isOn: $showInDock) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Show Dock icon")
-                        Text("When off, Workspace Flow runs menu-bar only (no Dock icon)")
+                        Text("When off, DeskFlow runs menu-bar only (no Dock icon)")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -101,7 +101,7 @@ struct SettingsView: View {
                 }
                 .padding(.vertical, 2)
 
-                Text("Workspace Flow uses Accessibility access only to identify, move, resize, minimize, and bring forward app windows. It never reads window contents.")
+                Text("DeskFlow uses Accessibility access only to identify, move, resize, minimize, and bring forward app windows. It never reads window contents.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } header: {
@@ -179,10 +179,10 @@ struct PrivacyPolicyView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: WFSpacing.lg) {
-                    PolicySection(title: "What Workspace Flow accesses",
-                                  content: "Workspace Flow uses macOS Accessibility API only to identify, move, resize, minimize, and bring forward application windows when you restore a workspace.")
+                    PolicySection(title: "What DeskFlow accesses",
+                                  content: "DeskFlow uses macOS Accessibility API only to identify, move, resize, minimize, and bring forward application windows when you restore a workspace.")
 
-                    PolicySection(title: "What Workspace Flow never does",
+                    PolicySection(title: "What DeskFlow never does",
                                   content: """
 • Never reads the contents of your windows, documents, or browser tabs.
 • Never records your screen or takes screenshots.

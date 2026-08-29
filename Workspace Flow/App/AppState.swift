@@ -25,6 +25,12 @@ final class AppState {
     var showWorkspaceEditor: Bool    = false
     var editingWorkspace: Workspace? = nil
     var showSwitcherOverlay: Bool    = false
+    
+    var activeWorkspaceId: String? {
+        get { UserDefaults.standard.string(forKey: "activeWorkspaceId") }
+        set { UserDefaults.standard.set(newValue, forKey: "activeWorkspaceId") }
+    }
+
 
     // HUD
     var showRestoreHUD: Bool     = false
@@ -60,5 +66,9 @@ final class AppState {
             try? await Task.sleep(nanoseconds: 3_000_000_000)
             showRestoreHUD = false
         }
+    }
+
+    func setActiveWorkspace(_ workspace: Workspace) {
+        activeWorkspaceId = workspace.id.uuidString
     }
 }

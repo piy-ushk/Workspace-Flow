@@ -180,7 +180,7 @@ struct WorkspaceDashboardView: View {
                     Image(systemName: "menubar.rectangle")
                         .foregroundStyle(.secondary)
                 }
-                .help("Workspace Flow lives in your menu bar")
+                .help("DeskFlow lives in your menu bar")
                 .popover(isPresented: $showMenuBarPopover, arrowEdge: .top) {
                     MenuBarInfoPopover()
                 }
@@ -208,6 +208,7 @@ struct WorkspaceDashboardView: View {
             workspace.lastUsedAt = Date()
             try? modelContext.save()
             appState.activityLog.logRestore(result: result, workspace: workspace, in: modelContext)
+            appState.setActiveWorkspace(workspace)
             appState.showHUD(result: result)
         }
     }
